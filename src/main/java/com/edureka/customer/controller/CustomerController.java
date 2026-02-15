@@ -40,8 +40,7 @@ public class CustomerController {
                     .body(Map.of("error", "Customer email is required"));
         }
 
-        customer.setId(customer.getId() != null && !customer.getId().isBlank()
-                ? customer.getId() : UUID.randomUUID().toString());
+        customer.setId(UUID.randomUUID().toString());
         Customer saved = repository.save(customer);
         _logger.info("New customer added successfully: {}", saved.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
@@ -52,8 +51,7 @@ public class CustomerController {
      * Returns 200 OK with list (empty list if none or no match).
      */
     @GetMapping(value = {"", "/", "/all"})
-    public ResponseEntity<?> getAllCustomers(
-            @RequestParam(required = false) String email) {
+    public ResponseEntity<?> getAllCustomers(@RequestParam(required = false) String email) {
         _logger.info("Getting all customers" + (email != null && !email.isBlank() ? " for email: " + email : ""));
         List<Customer> customers = email != null && !email.isBlank()
                 ? repository.findByEmail(email)
