@@ -62,6 +62,24 @@ public class CustomerController {
     }
 
     /**
+     * Get customer by email. Used by Order service for inter-service validation.
+     * Returns 200 with customer or 404 Not Found.
+     */
+    @GetMapping("/email/{email}")
+    public ResponseEntity<?> getCustomerByEmail(@PathVariable String email) {
+        if (email == null || email.isBlank()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Customer email is required"));
+        }
+        _logger.info("Getting customer with email: {}", email);
+        return repository.findByEmail(email).stream()
+                .findFirst()
+                .<ResponseEntity<?>>map(ResponseEntity::ok)
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "Customer not found for email: " + email)));
+    }
+
+    /**
      * Get customer by ID (path variable). Returns 200 with customer or 404 Not Found.
      */
     @GetMapping("/{id}")
@@ -72,7 +90,7 @@ public class CustomerController {
         }
         _logger.info("Getting customer with id: {}", id);
         return repository.findById(id)
-                .map(ResponseEntity::ok)
+                .<ResponseEntity<?>>map(ResponseEntity::ok)
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(Map.of("error", "Customer not found for id: " + id)));
     }
