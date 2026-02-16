@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: customer-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: customer-service
+  template:
+    metadata:
+      labels:
+        app: customer-service
+    spec:
+      containers:
+        - name: customer-service
+          image: vishal101090/customer-service:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: SERVER_PORT
+              value: "5006"
+            - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+              value: "http://discovery-service:5001/eureka/"
+            - name: SPRING_DATA_MONGODB_URI
+              value: "mongodb://mongodb-service:27017/customer-db"
+          ports:
+            - containerPort: 5006
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 5006
+            initialDelaySeconds: 60
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 5006
+            initialDelaySeconds: 40
+            periodSeconds: 10
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: customer-service
+spec:
+  selector:
+    app: customer-service
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 5006
+      targetPort: 5006
+
+---
+
+#apiVersion: networking.k8s.io/v1
+#kind: Ingress
+#metadata:
+#  name: customer-ingress
+#spec:
+#  ingressClassName: nginx
+#  rules:
+#    - host: customer.local
+#      http:
+#        paths:
+#          - path: /
+#            pathType: Prefix
+#            backend:
+#              service:
+#                name: customer-service
+#                port:
+#                  number: 5006
