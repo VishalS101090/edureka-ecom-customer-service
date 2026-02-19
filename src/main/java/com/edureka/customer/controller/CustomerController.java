@@ -22,6 +22,16 @@ public class CustomerController {
     private CustomerRepository repository;
 
     /**
+     * Get all customers.
+     * Returns 200 OK with list of all customers (empty list if none).
+     */
+    @GetMapping(value = {"", "/", "/all"})
+    public ResponseEntity<?> getAllCustomers() {
+        _logger.info("Getting all customers");
+        return ResponseEntity.ok(repository.findAll());
+    }
+
+    /**
      * Create a new customer.
      * Returns 201 Created with the created customer, or 400 for validation errors.
      */
