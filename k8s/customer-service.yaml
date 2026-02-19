@@ -15,7 +15,7 @@ spec:
       containers:
         - name: customer-service
           image: vishal101090/customer-service:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           env:
             - name: SERVER_PORT
               value: "5006"
